@@ -429,7 +429,6 @@ def _import_helper(file_path: str, overwrite: bool) -> None:
                 conn.id = existing_conn_id
 
             session.merge(conn)
-            session.commit()
             print(f"Imported connection {conn_id}")
 
 

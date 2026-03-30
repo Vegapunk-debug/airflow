@@ -36,7 +36,7 @@ from airflow.secrets.local_filesystem import load_variables
 from airflow.utils import cli as cli_utils
 from airflow.utils.cli import suppress_logs_and_warning
 from airflow.utils.providers_configuration_loader import providers_configuration_loaded
-from airflow.utils.session import create_session, provide_session
+from airflow.utils.session import NEW_SESSION, create_session, provide_session
 
 
 class VariableDisplayMapper:
@@ -122,7 +122,7 @@ def variables_delete(args):
 @cli_utils.action_cli
 @providers_configuration_loaded
 @provide_session
-def variables_import(args, session):
+def variables_import(args, *, session=NEW_SESSION):
     """Import variables from a given file."""
     if not os.path.exists(args.file):
         raise SystemExit("Missing variables file.")
@@ -153,7 +153,7 @@ def variables_import(args, session):
             description = None
             if isinstance(v, dict) and v.get("value"):  # verify that var configuration has value
                 value, description = v["value"], v.get("description")
-            Variable.set(k, value, description, serialize_json=not isinstance(value, str))
+            Variable.set(k, value, description, serialize_json=not isinstance(value, str), session=session)
         except Exception as e:
             print(f"Variable import failed: {e!r}")
             fail_count += 1
