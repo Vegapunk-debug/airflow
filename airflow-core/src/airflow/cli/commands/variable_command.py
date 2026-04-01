@@ -122,7 +122,7 @@ def variables_delete(args):
 @cli_utils.action_cli
 @providers_configuration_loaded
 @provide_session
-def variables_import(args, *, session=NEW_SESSION):
+def variables_import(args, session):
     """Import variables from a given file."""
     if not os.path.exists(args.file):
         raise SystemExit("Missing variables file.")
@@ -153,7 +153,7 @@ def variables_import(args, *, session=NEW_SESSION):
             description = None
             if isinstance(v, dict) and v.get("value"):  # verify that var configuration has value
                 value, description = v["value"], v.get("description")
-            Variable.set(k, value, description, serialize_json=not isinstance(value, str), session=session)
+            Variable.set(k, value, description, serialize_json=not isinstance(value, str))
         except Exception as e:
             print(f"Variable import failed: {e!r}")
             fail_count += 1
