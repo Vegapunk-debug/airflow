@@ -36,7 +36,7 @@ from airflow.secrets.local_filesystem import load_variables
 from airflow.utils import cli as cli_utils
 from airflow.utils.cli import suppress_logs_and_warning
 from airflow.utils.providers_configuration_loader import providers_configuration_loaded
-from airflow.utils.session import NEW_SESSION, create_session, provide_session
+from airflow.utils.session import create_session, provide_session
 
 
 class VariableDisplayMapper:
