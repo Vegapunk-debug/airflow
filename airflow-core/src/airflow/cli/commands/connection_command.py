@@ -412,6 +412,8 @@ def _import_helper(file_path: str, overwrite: bool) -> None:
     """
     connections_dict = load_connections_dict(file_path)
     with create_session() as session:
+        suc_count = 0
+        fail_count = 0
         for conn_id, conn in connections_dict.items():
             try:
                 helpers.validate_key(conn_id, max_length=200)
@@ -428,14 +430,17 @@ def _import_helper(file_path: str, overwrite: bool) -> None:
                 # The conn_ids match, but the PK of the new entry must also be the same as the old
                 conn.id = existing_conn_id
 
-            with session.begin_nested() as nested:
-                try:
-                    session.merge(conn)
-                except Exception as e:
-                    print(f"Failed to import connection {conn_id}: {e!r}")
-                    nested.rollback()
-                    continue
-            print(f"Imported connection {conn_id}")
+            try:
+                session.merge(conn)
+            except Exception as e:
+                print(f"Failed to import connection {conn_id}: {e!r}")
+                fail_count += 1
+            else:
+                print(f"Imported connection {conn_id}")
+                suc_count += 1
+        print(f"{suc_count} of {len(connections_dict)} connections successfully updated.")
+        if fail_count:
+            print(f"{fail_count} connection(s) failed to be updated.")
 @suppress_logs_and_warning
 @providers_configuration_loaded
 def connections_test(args) -> None:
