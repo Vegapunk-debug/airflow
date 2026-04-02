@@ -427,15 +427,15 @@ def _import_helper(file_path: str, overwrite: bool) -> None:
 
                 # The conn_ids match, but the PK of the new entry must also be the same as the old
                 conn.id = existing_conn_id
-            try:
-                session.merge(conn)
-                session.commit()
-                print(f"Imported connection {conn_id}")
-            except Exception as e:
-                print(f"Failed to import connection {conn_id}: {e!r}")
-                session.rollback()
 
-
+            with session.begin_nested() as nested:
+                try:
+                    session.merge(conn)
+                except Exception as e:
+                    print(f"Failed to import connection {conn_id}: {e!r}")
+                    nested.rollback()
+                    continue
+            print(f"Imported connection {conn_id}")
 @suppress_logs_and_warning
 @providers_configuration_loaded
 def connections_test(args) -> None:
