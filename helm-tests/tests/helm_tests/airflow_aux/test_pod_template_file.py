@@ -681,18 +681,26 @@ class TestPodTemplateFile:
         assert jmespath.search("spec.nodeSelector", docs[0]) == {"diskType": "ssd"}
 
     @pytest.mark.parametrize(
-        ("base_scheduler_name", "worker_scheduler_name", "expected"),
+        ("base_scheduler_name", "worker_values", "expected"),
         [
-            ("default-scheduler", "most-allocated", "most-allocated"),
-            ("default-scheduler", None, "default-scheduler"),
-            (None, None, None),
+            ("default-scheduler", {"schedulerName": "most-allocated"}, "most-allocated"),
+            ("default-scheduler", {"kubernetes": {"schedulerName": "most-allocated"}}, "most-allocated"),
+            (
+                "default-scheduler",
+                {"schedulerName": "least-allocated", "kubernetes": {"schedulerName": "most-allocated"}},
+                "most-allocated",
+            ),
+            ("default-scheduler", {"schedulerName": None}, "default-scheduler"),
+            ("default-scheduler", {"kubernetes": {"schedulerName": None}}, "default-scheduler"),
+            (None, {"schedulerName": None}, None),
+            (None, {"kubernetes": {"schedulerName": None}}, None),
         ],
     )
-    def test_scheduler_name(self, base_scheduler_name, worker_scheduler_name, expected):
+    def test_scheduler_name(self, base_scheduler_name, worker_values, expected):
         docs = render_chart(
             values={
                 "schedulerName": base_scheduler_name,
-                "workers": {"schedulerName": worker_scheduler_name},
+                "workers": worker_values,
             },
             show_only=["templates/pod-template-file.yaml"],
             chart_dir=self.temp_chart_dir,
@@ -1190,13 +1198,17 @@ class TestPodTemplateFile:
             {"ip": "127.0.0.2", "hostnames": ["test.hostname"]}
         ]
 
-    def test_workers_priority_class_name(self):
+    @pytest.mark.parametrize(
+        "workers_values",
+        [
+            {"priorityClassName": "test-priority"},
+            {"kubernetes": {"priorityClassName": "test-priority"}},
+            {"priorityClassName": "test", "kubernetes": {"priorityClassName": "test-priority"}},
+        ],
+    )
+    def test_workers_priority_class_name(self, workers_values):
         docs = render_chart(
-            values={
-                "workers": {
-                    "priorityClassName": "test-priority",
-                },
-            },
+            values={"workers": workers_values},
             show_only=["templates/pod-template-file.yaml"],
             chart_dir=self.temp_chart_dir,
         )
@@ -1259,11 +1271,17 @@ class TestPodTemplateFile:
 
         assert jmespath.search("spec.terminationGracePeriodSeconds", docs[0]) == 123
 
-    def test_runtime_class_name_values_are_configurable(self):
+    @pytest.mark.parametrize(
+        "workers_values",
+        [
+            {"runtimeClassName": "nvidia"},
+            {"kubernetes": {"runtimeClassName": "nvidia"}},
+            {"runtimeClassName": "test", "kubernetes": {"runtimeClassName": "nvidia"}},
+        ],
+    )
+    def test_runtime_class_name_values_are_configurable(self, workers_values):
         docs = render_chart(
-            values={
-                "workers": {"runtimeClassName": "nvidia"},
-            },
+            values={"workers": workers_values},
             show_only=["templates/pod-template-file.yaml"],
             chart_dir=self.temp_chart_dir,
         )

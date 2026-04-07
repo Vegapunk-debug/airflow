@@ -629,6 +629,22 @@ DEPRECATION WARNING:
 
 {{- end }}
 
+{{- if not (empty .Values.workers.runtimeClassName) }}
+
+ DEPRECATION WARNING:
+    `workers.runtimeClassName` has been renamed to `workers.celery.runtimeClassName`/`workers.kubernetes.runtimeClassName`.
+    Please change your values as support for the old name will be dropped in a future release.
+
+{{- end }}
+
+{{- if not (empty .Values.workers.priorityClassName) }}
+
+ DEPRECATION WARNING:
+    `workers.priorityClassName` has been renamed to `workers.celery.priorityClassName`/`workers.kubernetes.priorityClassName`.
+    Please change your values as support for the old name will be dropped in a future release.
+
+{{- end }}
+
 {{- if not (empty .Values.workers.nodeSelector) }}
 
  DEPRECATION WARNING:
@@ -649,6 +665,22 @@ DEPRECATION WARNING:
 
  DEPRECATION WARNING:
     `workers.hostAliases` has been renamed to `workers.celery.hostAliases`/`workers.kubernetes.hostAliases`.
+    Please change your values as support for the old name will be dropped in a future release.
+
+{{- end }}
+
+{{- if not (empty .Values.workers.volumeClaimTemplates) }}
+
+ DEPRECATION WARNING:
+    `workers.volumeClaimTemplates` has been renamed to `workers.celery.volumeClaimTemplates`.
+    Please change your values as support for the old name will be dropped in a future release.
+
+{{- end }}
+
+{{- if not (empty .Values.workers.schedulerName) }}
+
+ DEPRECATION WARNING:
+    `workers.schedulerName` has been renamed to `workers.celery.schedulerName`/`workers.kubernetes.schedulerName`.
     Please change your values as support for the old name will be dropped in a future release.
 
 {{- end }}
